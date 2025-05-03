@@ -1,24 +1,14 @@
-name: The name of your action here
-description: Provide a description here
-author: Your name or organization here
-
-# Add your action's branding here. This will appear on the GitHub Marketplace.
+name: 'Setup Dojo'
+description: 'Setup the Dojo toolchain for use in GitHub Actions'
+author: 'DojoEngine'
 branding:
-  icon: heart
-  color: red
-
-# Define your inputs here.
+  icon: 'check'
+  color: 'blue'
 inputs:
-  milliseconds:
-    description: Your input description here
-    required: true
-    default: '1000'
-
-# Define your outputs here.
-outputs:
-  time:
-    description: Your output description here
-
+  version:
+    description: 'Version of Dojo to install. If not specified, installs the latest stable version.'
+    required: false
+    default: ''
 runs:
-  using: node20
-  main: dist/index.js
+  using: 'node20'
+  main: 'dist/index.js'
