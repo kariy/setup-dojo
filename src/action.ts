@@ -5,18 +5,21 @@ import * as os from 'os'
 
 export async function run(): Promise<void> {
   try {
-    // Get the version input
-    const version = core.getInput('version')
-
     // Install dojoup
     core.info('Installing dojoup...')
     await installDojoup()
-
     // Add dojo to PATH
     const dojoBinPath = path.join(os.homedir(), '.dojo', 'bin')
+    // Add dojo to PATH
+    const dojoupBinPath = path.join(os.homedir(), '.dojo', 'dojoup')
+
     core.addPath(dojoBinPath)
     core.info(`Added ${dojoBinPath} to PATH`)
+    core.addPath(dojoupBinPath)
+    core.info(`Added ${dojoupBinPath} to PATH`)
 
+    // Get the version input
+    const version = core.getInput('version')
     // Install the Dojo toolchain
     await installDojoToolchain(version)
 
@@ -38,7 +41,7 @@ async function installDojoup(): Promise<void> {
   await exec.exec('bash', ['dojoup-installer.sh'])
 }
 
-async function installDojoToolchain(version: string): Promise<void> {
+async function installDojoToolchain(version?: string): Promise<void> {
   const args = ['install']
 
   if (version) {
