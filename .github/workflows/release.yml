@@ -2,7 +2,7 @@ name: 🚀 Release new action version
 
 on:
   release:
-    types: [released]
+    types: [published]
 
   workflow_dispatch:
     inputs:
