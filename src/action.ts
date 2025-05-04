@@ -8,15 +8,6 @@ export async function run(): Promise<void> {
     // Install dojoup
     core.info('Installing dojoup...')
     await installDojoup()
-    // Add dojo to PATH
-    const dojoBinPath = path.join(os.homedir(), '.dojo', 'bin')
-    // Add dojo to PATH
-    const dojoupBinPath = path.join(os.homedir(), '.dojo', 'dojoup')
-
-    core.addPath(dojoBinPath)
-    core.info(`Added ${dojoBinPath} to PATH`)
-    core.addPath(dojoupBinPath)
-    core.info(`Added ${dojoupBinPath} to PATH`)
 
     // Get the version input
     const version = core.getInput('version')
@@ -30,7 +21,12 @@ export async function run(): Promise<void> {
   }
 }
 
-async function installDojoup(): Promise<void> {
+/**
+ * Installs the dojoup utility.
+ * 
+ * @returns {Promise<void>}
+ */
+export async function installDojoup(): Promise<void> {
   // Install dojoup using curl
   await exec.exec('curl', [
     '-L',
@@ -39,9 +35,19 @@ async function installDojoup(): Promise<void> {
     'dojoup-installer.sh'
   ])
   await exec.exec('bash', ['dojoup-installer.sh'])
+
+  // Add dojoup bin to PATH
+  const binPath = path.join(os.homedir(), '.dojo', 'dojoup')
+  core.addPath(binPath)
 }
 
-async function installDojoToolchain(version?: string): Promise<void> {
+/**
+ * Installs the Dojo toolchain.
+ * 
+ * @param {string} version - The version to install. If empty, installs the latest version.
+ * @returns {Promise<void>}
+ */
+export async function installDojoToolchain(version?: string): Promise<void> {
   const args = ['install']
 
   if (version) {
@@ -54,4 +60,30 @@ async function installDojoToolchain(version?: string): Promise<void> {
   // Run dojoup install with the appropriate arguments
   const dojoupPath = path.join(os.homedir(), '.dojo', 'dojoup', 'dojoup')
   await exec.exec(dojoupPath, args)
+
+  const binPath = path.join(os.homedir(), '.dojo', 'bin')
+  core.addPath(binPath)
+}
+
+/**
+ * Verifies the installed Dojo toolchain version.
+ * 
+ * @param {string} expectedVersion - The version to verify.
+ * @returns {Promise<boolean>} - True if the installed version matches the expected version.
+ */
+export async function verifyInstalledVersion(expectedVersion: string): Promise<boolean> {
+  let installedVersion = ''
+  
+  const options = {
+    listeners: {
+      stdout: (data: Buffer) => {
+        installedVersion += data.toString().trim()
+      }
+    }
+  }
+  
+  const dojoupPath = path.join(os.homedir(), '.dojo', 'dojoup', 'dojoup')
+  await exec.exec(dojoupPath, ['show'], options)
+  
+  return installedVersion === expectedVersion
 }

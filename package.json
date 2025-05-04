@@ -14,7 +14,9 @@
     "check": "prettier --check **/*.{js,ts,json,yml,yaml,md}",
     "build": "bun build src/main.ts --outfile=dist/index.js --minify --target=node",
     "lint": "eslint --format codeframe --exit-on-fatal-error --stats",
-    "fmt": "prettier --write **/*.{js,ts,json,yml,yaml,md}"
+    "fmt": "prettier --write **/*.{js,ts,json,yml,yaml,md}",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@actions/core": "^1.11.1",
@@ -26,6 +28,7 @@
     "@jest/globals": "^29.7.0",
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-node-resolve": "^16.0.1",
+    "@types/jest": "^29.5.12",
     "eslint": "^9.25.0",
     "eslint-config-prettier": "^10.1.2",
     "eslint-plugin-import": "^2.31.0",
@@ -35,6 +38,8 @@
     "make-coverage-badge": "^1.2.0",
     "prettier": "^3.5.3",
     "prettier-eslint": "^16.4.1",
-    "rollup": "^4.40.0"
+    "rollup": "^4.40.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.4.2"
   }
 }
