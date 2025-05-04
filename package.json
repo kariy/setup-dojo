@@ -1,7 +1,7 @@
 {
   "name": "setup-dojo",
   "description": "Setup Dojo on GitHub Actions.",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "author": "Ammar Arif <evergreenkary@gmail.com>",
   "license": "MIT",
   "type": "module",
