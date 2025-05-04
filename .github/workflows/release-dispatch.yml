@@ -24,7 +24,7 @@ jobs:
       - run: |
           VERSION=${{ inputs.version }}
           VERSION=${VERSION#v}
-          npm version $VERSION
+          npm version $VERSION --no-git-tag-version
 
       - id: version_info
         run: echo "version=$(npm pkg get version | tr -d '"')" >> $GITHUB_OUTPUT
