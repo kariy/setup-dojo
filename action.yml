@@ -1,4 +1,4 @@
-name: 'Setup Dojo'
+name: 'Setup Dojo Toolchain'
 description: 'Setup the Dojo toolchain for use in GitHub Actions'
 author: 'DojoEngine'
 branding:
@@ -6,7 +6,9 @@ branding:
   color: 'blue'
 inputs:
   version:
-    description: 'Version of Dojo to install. If not specified, installs the latest stable version.'
+    description:
+      'Version of Dojo to install. If not specified, installs the latest stable
+      version.'
     required: false
     default: ''
 runs:
