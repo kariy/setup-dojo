@@ -32,14 +32,12 @@ jobs:
       - uses: peter-evans/create-pull-request@v7
         with:
           base: main
+          labels: release
           delete-branch: true
           branch: prepare-release
           token: ${{ secrets.CREATE_PR_TOKEN }}
           title: 'release: v${{ steps.version_info.outputs.version }}'
           commit-message: 'release: v${{ steps.version_info.outputs.version }}'
-          labels: release
-          # Enable auto-merge
-          auto-merge: squash
 
   create-release:
     # Only run this job when PR is merged
