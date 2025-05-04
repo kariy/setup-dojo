@@ -6,9 +6,15 @@ on:
         description: Version to release
         required: true
         type: string
+  # Add trigger for PR merge
+  pull_request:
+    types: [closed]
+    branches: [main]
 
 jobs:
   propose-release:
+    # Only run this job for workflow_dispatch events
+    if: github.event_name == 'workflow_dispatch'
     permissions:
       pull-requests: write
       contents: write
@@ -31,3 +37,31 @@ jobs:
           token: ${{ secrets.CREATE_PR_TOKEN }}
           title: 'release: v${{ steps.version_info.outputs.version }}'
           commit-message: 'release: v${{ steps.version_info.outputs.version }}'
+          labels: release
+          # Enable auto-merge
+          auto-merge: squash
+
+  create-release:
+    # Only run this job when PR is merged
+    if:
+      github.event_name == 'pull_request' && github.event.pull_request.merged ==
+      true && contains(github.event.pull_request.labels.*.name, 'release')
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version from package.json
+        id: version
+        run: echo "version=$(npm pkg get version | tr -d '"')" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          draft: false
+          prerelease: false
+          tag_name: v${{ steps.version.outputs.version }}
+          release_name: v${{ steps.version.outputs.version }}
