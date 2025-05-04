@@ -1,0 +1,33 @@
+name: release-dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release
+        required: true
+        type: string
+
+jobs:
+  propose-release:
+    permissions:
+      pull-requests: write
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          VERSION=${{ inputs.version }}
+          VERSION=${VERSION#v}
+          npm version $VERSION
+
+      - id: version_info
+        run: echo "version=$(npm pkg get version | tr -d '"')" >> $GITHUB_OUTPUT
+
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          base: main
+          delete-branch: true
+          branch: prepare-release
+          token: ${{ secrets.CREATE_PR_TOKEN }}
+          title: 'release: v${{ steps.version_info.outputs.version }}'
+          commit-message: 'release: v${{ steps.version_info.outputs.version }}'

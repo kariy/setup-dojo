@@ -1,6 +1,6 @@
 {
-  "name": "javascript-action",
-  "description": "GitHub Actions JavaScript Template",
+  "name": "setup-dojo",
+  "description": "Setup Dojo on GitHub Actions.",
   "version": "0.0.0",
   "author": "Ammar Arif <evergreenkary@gmail.com>",
   "license": "MIT",
