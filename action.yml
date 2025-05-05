@@ -1,9 +1,11 @@
 name: 'Setup Dojo Toolchain'
 description: 'Setup the Dojo toolchain for use in GitHub Actions'
 author: 'DojoEngine'
+
 branding:
   icon: 'check'
   color: 'blue'
+
 inputs:
   version:
     description:
@@ -11,6 +13,11 @@ inputs:
       version.'
     required: false
     default: ''
+
+outputs:
+  version:
+    description: The version of the Dojo toolchain that was installed.
+
 runs:
   using: 'node20'
   main: 'dist/index.js'
