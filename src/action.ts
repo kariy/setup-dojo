@@ -36,7 +36,10 @@ export async function installDojoup(): Promise<string> {
   await exec.exec('bash', ['dojoup-installer.sh'])
   core.addPath(dojoupDirPath)
 
-  return join(dojoupDirPath, 'dojoup')
+  const dojoupPath = join(dojoupDirPath, 'dojoup')
+  await exec.exec('chmod', ['+x', dojoupPath])
+
+  return dojoupPath
 }
 
 export async function installDojoToolchain(
