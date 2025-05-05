@@ -6,17 +6,16 @@
   "license": "MIT",
   "type": "module",
   "private": true,
+  "main": "dist/index.js",
   "repository": "https://github.com/kariy/setup-dojo",
   "keywords": [
     "actions"
   ],
   "scripts": {
     "check": "prettier --check **/*.{js,ts,json,yml,yaml,md}",
-    "build": "bun build src/main.ts --outfile=dist/index.js --minify --target=node",
+    "build": "bun build src/index.ts --outfile=dist/index.js --minify --target=node",
     "lint": "eslint --format codeframe --exit-on-fatal-error --stats",
-    "fmt": "prettier --write **/*.{js,ts,json,yml,yaml,md}",
-    "test": "jest",
-    "test:watch": "jest --watch"
+    "fmt": "prettier --write **/*.{js,ts,json,yml,yaml,md}"
   },
   "dependencies": {
     "@actions/core": "^1.11.1",

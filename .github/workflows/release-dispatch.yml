@@ -21,7 +21,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+
       - run: |
+          npm run build
           VERSION=${{ inputs.version }}
           VERSION=${VERSION#v}
           npm version $VERSION --no-git-tag-version
