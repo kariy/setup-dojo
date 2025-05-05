@@ -1,53 +1,48 @@
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
-import * as path from 'path'
+import { join } from 'node:path'
 import * as os from 'os'
 
-export async function run(): Promise<void> {
+export type Input = {
+  version?: string
+}
+
+export type Output = {
+  version: string
+}
+
+export default async (options: Input): Promise<Output> => {
   try {
-    // Install dojoup
     core.info('Installing dojoup...')
-    await installDojoup()
-
-    // Get the version input
-    const version = core.getInput('version')
-    // Install the Dojo toolchain
-    await installDojoToolchain(version)
-
-    core.info('Dojo toolchain set up successfully')
+    const dojoupPath = await installDojoup()
+    const version = await installDojoToolchain(dojoupPath, options.version)
+    core.info(`Dojo toolchain ${version} installed successfully`)
+    return { version }
   } catch (error) {
-    // Fail the workflow run if an error occurs
-    if (error instanceof Error) core.setFailed(error.message)
+    throw error
   }
 }
 
-/**
- * Installs the dojoup utility.
- * 
- * @returns {Promise<void>}
- */
-export async function installDojoup(): Promise<void> {
-  // Install dojoup using curl
+export async function installDojoup(): Promise<string> {
+  // Install dojoup using the installation script
   await exec.exec('curl', [
     '-L',
     'https://install.dojoengine.org',
     '-o',
     'dojoup-installer.sh'
   ])
-  await exec.exec('bash', ['dojoup-installer.sh'])
 
-  // Add dojoup bin to PATH
-  const binPath = path.join(os.homedir(), '.dojo', 'dojoup')
-  core.addPath(binPath)
+  const dojoupDirPath = join(os.homedir(), '.dojo', 'dojoup')
+  await exec.exec('bash', ['dojoup-installer.sh'])
+  core.addPath(dojoupDirPath)
+
+  return join(dojoupDirPath, 'dojoup')
 }
 
-/**
- * Installs the Dojo toolchain.
- * 
- * @param {string} version - The version to install. If empty, installs the latest version.
- * @returns {Promise<void>}
- */
-export async function installDojoToolchain(version?: string): Promise<void> {
+export async function installDojoToolchain(
+  dojoupPath: string,
+  version?: string
+): Promise<string> {
   const args = ['install']
 
   if (version) {
@@ -57,33 +52,30 @@ export async function installDojoToolchain(version?: string): Promise<void> {
     core.info('Installing latest Dojo toolchain')
   }
 
-  // Run dojoup install with the appropriate arguments
-  const dojoupPath = path.join(os.homedir(), '.dojo', 'dojoup', 'dojoup')
   await exec.exec(dojoupPath, args)
+  core.addPath(join(os.homedir(), '.dojo', 'bin'))
 
-  const binPath = path.join(os.homedir(), '.dojo', 'bin')
-  core.addPath(binPath)
+  return await getInstalledVersion(dojoupPath)
 }
 
-/**
- * Verifies the installed Dojo toolchain version.
- * 
- * @param {string} expectedVersion - The version to verify.
- * @returns {Promise<boolean>} - True if the installed version matches the expected version.
- */
-export async function verifyInstalledVersion(expectedVersion: string): Promise<boolean> {
-  let installedVersion = ''
-  
-  const options = {
-    listeners: {
-      stdout: (data: Buffer) => {
-        installedVersion += data.toString().trim()
-      }
+export async function getInstalledVersion(
+  dojoupPath?: string
+): Promise<string> {
+  const path = dojoupPath || 'dojoup'
+
+  let actualInstalledVersion = ''
+  const stdout = (data: Buffer) => {
+    const versionRegex = /version: ([^\s]+)/
+    const versionMatch = data.toString().trim().match(versionRegex)
+    if (versionMatch) {
+      actualInstalledVersion += versionMatch[1]
     }
   }
-  
-  const dojoupPath = path.join(os.homedir(), '.dojo', 'dojoup', 'dojoup')
-  await exec.exec(dojoupPath, ['show'], options)
-  
-  return installedVersion === expectedVersion
+  await exec.exec(path, ['show'], {
+    listeners: {
+      stdout
+    }
+  })
+
+  return actualInstalledVersion
 }
