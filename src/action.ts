@@ -58,11 +58,11 @@ export async function installDojoup(): Promise<string> {
     '-L',
     'https://install.dojoengine.org',
     '-o',
-    'dojoup-installer.sh'
+    join(os.homedir(), 'dojoup-installer.sh')
   ])
 
   core.info('Running dojoup installer...')
-  await exec.exec('bash', ['dojoup-installer.sh', '-v'])
+  await exec.exec('bash', [join(os.homedir(), 'dojoup-installer.sh'), '-v'])
 
   core.info(`Checking if dojoup directory exists at: ${dojoupDirPath}`)
 
