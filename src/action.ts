@@ -72,6 +72,10 @@ export async function installDojoup(): Promise<string> {
     await exec.exec('ls', ['-la', os.homedir()])
     await exec.exec('ls', ['-la', join(os.homedir(), 'work')])
     await exec.exec('ls', ['-la', join(os.homedir(), 'work', 'setup-dojo')])
+    await exec.exec('ls', [
+      '-la',
+      join(os.homedir(), 'work', 'setup-dojo', 'setup-dojo')
+    ])
     await exec.exec('ls', ['-la', dojoDir])
     core.info('Directory listing for .dojo:')
     await exec.exec('ls', ['-la', dojoupDirPath])
