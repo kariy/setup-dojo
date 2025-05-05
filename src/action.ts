@@ -18,18 +18,18 @@ export default async (options: Input): Promise<Output> => {
     core.info(`Home directory: ${os.homedir()}`)
     core.info(`Current directory: ${process.cwd()}`)
     core.endGroup()
-    
+
     core.startGroup('Installing dojoup')
     core.info('Starting dojoup installation process...')
     const dojoupPath = await installDojoup()
     core.endGroup()
-    
+
     core.startGroup('Installing Dojo toolchain')
     const version = await installDojoToolchain(dojoupPath, options.version)
     core.endGroup()
-    
+
     core.info(`Dojo toolchain ${version} installed successfully`)
-    
+
     return { version }
   } catch (error) {
     core.setFailed(`Failed to install Dojo toolchain: ${error}`)
@@ -38,20 +38,20 @@ export default async (options: Input): Promise<Output> => {
 }
 
 export async function installDojoup(): Promise<string> {
-  // Log current environment details
-  core.info(`Current user home directory: ${os.homedir()}`)
-  core.info(`Current working directory: ${process.cwd()}`)
-  
-  // Ensure .dojo directories exist
+  // // Log current environment details
+  // core.info(`Current user home directory: ${os.homedir()}`)
+  // core.info(`Current working directory: ${process.cwd()}`)
+
+  // // Ensure .dojo directories exist
   const dojoDir = join(os.homedir(), '.dojo')
   const dojoupDirPath = join(dojoDir, 'dojoup')
   const dojoBinPath = join(dojoDir, 'bin')
-  
-  core.info('Creating necessary directories if they don\'t exist')
-  await exec.exec('mkdir', ['-p', dojoDir])
-  await exec.exec('mkdir', ['-p', dojoupDirPath])
-  await exec.exec('mkdir', ['-p', dojoBinPath])
-  
+
+  // core.info("Creating necessary directories if they don't exist")
+  // await exec.exec('mkdir', ['-p', dojoDir])
+  // await exec.exec('mkdir', ['-p', dojoupDirPath])
+  // await exec.exec('mkdir', ['-p', dojoBinPath])
+
   // Install dojoup using the installation script
   core.info('Downloading dojoup installer...')
   await exec.exec('curl', [
@@ -63,11 +63,12 @@ export async function installDojoup(): Promise<string> {
 
   core.info('Running dojoup installer...')
   await exec.exec('bash', ['dojoup-installer.sh', '-v'])
-  
+
   core.info(`Checking if dojoup directory exists at: ${dojoupDirPath}`)
-  
+
   // Check if the directory exists and log the result
   try {
+    await exec.exec('ls', ['-la', os.homedir()])
     await exec.exec('ls', ['-la', dojoDir])
     core.info('Directory listing for .dojo:')
     await exec.exec('ls', ['-la', dojoupDirPath])
@@ -75,14 +76,14 @@ export async function installDojoup(): Promise<string> {
   } catch (error) {
     core.warning(`Error listing directory: ${error}`)
   }
-  
+
   // Add to PATH
   core.info(`Adding ${dojoupDirPath} to PATH`)
   core.addPath(dojoupDirPath)
 
   const dojoupPath = join(dojoupDirPath, 'dojoup')
   core.info(`Dojoup expected at: ${dojoupPath}`)
-  
+
   return dojoupPath
 }
 
@@ -111,10 +112,10 @@ export async function installDojoToolchain(
 
   core.info(`Running ${dojoupPath} with args: ${args.join(' ')}`)
   await exec.exec(dojoupPath, args)
-  
+
   const dojoBinPath = join(os.homedir(), '.dojo', 'bin')
   core.info(`Adding Dojo bin directory to PATH: ${dojoBinPath}`)
-  
+
   // Check if bin directory exists
   try {
     await exec.exec('ls', ['-la', dojoBinPath])
@@ -122,7 +123,7 @@ export async function installDojoToolchain(
   } catch (error) {
     core.warning(`Dojo bin directory not found: ${error}`)
   }
-  
+
   core.addPath(dojoBinPath)
 
   return await getInstalledVersion(dojoupPath)
@@ -136,13 +137,13 @@ export async function getInstalledVersion(
 
   let actualInstalledVersion = ''
   let stdoutData = ''
-  
+
   try {
     const stdout = (data: Buffer) => {
       const output = data.toString().trim()
       stdoutData += output
       core.info(`dojoup show output: ${output}`)
-      
+
       const versionRegex = /version: ([^\s]+)/
       const versionMatch = output.match(versionRegex)
       if (versionMatch) {
@@ -150,18 +151,18 @@ export async function getInstalledVersion(
         core.info(`Detected version: ${versionMatch[1]}`)
       }
     }
-    
+
     const stderr = (data: Buffer) => {
       core.warning(`dojoup show stderr: ${data.toString().trim()}`)
     }
-    
+
     await exec.exec(path, ['show'], {
       listeners: {
         stdout,
         stderr
       }
     })
-    
+
     if (!actualInstalledVersion && stdoutData) {
       core.warning('Version regex did not match, trying alternative pattern')
       // Try another regex pattern in case the output format changed
@@ -169,12 +170,16 @@ export async function getInstalledVersion(
       const altVersionMatch = stdoutData.match(altVersionRegex)
       if (altVersionMatch) {
         actualInstalledVersion = altVersionMatch[1]
-        core.info(`Detected version using alternative pattern: ${actualInstalledVersion}`)
+        core.info(
+          `Detected version using alternative pattern: ${actualInstalledVersion}`
+        )
       }
     }
-    
+
     if (!actualInstalledVersion) {
-      core.warning('Failed to extract version from output. Using fallback version.')
+      core.warning(
+        'Failed to extract version from output. Using fallback version.'
+      )
       actualInstalledVersion = 'unknown'
     }
   } catch (error) {
