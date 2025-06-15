@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import { join } from 'node:path'
+import { existsSync } from 'node:fs'
 import * as os from 'os'
 
 export type Input = {
@@ -32,12 +33,22 @@ export async function installDojoup(): Promise<string> {
     'dojoup-installer.sh'
   ])
 
-  const dojoupDirPath = join(os.homedir(), '.dojo', 'dojoup')
-  await exec.exec('bash', ['dojoup-installer.sh'])
-  core.addPath(dojoupDirPath)
+  // Make the installer script executable
+  await exec.exec('chmod', ['+x', 'dojoup-installer.sh'])
+  
+  // Run the installer script
+  await exec.exec('./dojoup-installer.sh')
 
+  const dojoupDirPath = join(os.homedir(), '.dojo', 'dojoup')
   const dojoupPath = join(dojoupDirPath, 'dojoup')
-  await exec.exec('chmod', ['+x', dojoupPath])
+  
+  if (!existsSync(dojoupPath)) {
+    throw new Error(`dojoup binary not found at ${dojoupPath}. Installation may have failed.`)
+  }
+  
+  // Add both dojoup and bin directories to PATH
+  core.addPath(dojoupDirPath)
+  core.addPath(join(os.homedir(), '.dojo', 'bin'))
 
   return dojoupPath
 }
